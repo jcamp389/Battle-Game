@@ -3,9 +3,11 @@ import pygame
 pygame.init()
 pygame.font.init()
 
-LENGTH = 300
-HEIGHT = 400
+LENGTH = 600
+HEIGHT = 600
 size = [LENGTH, HEIGHT]
+
+intro_screen_background = pygame.image.load('Intro_Screen_Background.jpg')
 
 black = (0, 0, 0)
 lime_green = (22, 246, 74)
@@ -19,8 +21,7 @@ running = 1
 surface = pygame.Surface(screen.get_size())
 board_surface = pygame.Surface((LENGTH * .80, HEIGHT * .80))
 
-# gameboard = pygame.image.load(os.path.join('data', r"C:\Users\Joel\Documents\BattleGame\Copy of 3P Game Board v. 2.jpg"))
-# gameboard = gameboard.convert()
+
 
 # Rect(left, top, width, height) -> Rect
 # 300 / 400
@@ -35,15 +36,15 @@ board_surface = pygame.Surface((LENGTH * .80, HEIGHT * .80))
 # 0,400              300,400
 
 # Rect(left, top, width, height) -> Rect
-exit_rect = pygame.Rect(LENGTH * .4, HEIGHT * .7, 80, 40)
-play_rect = pygame.Rect(LENGTH * .4, HEIGHT * .3, 90, 50)
+exit_rect = pygame.Rect(LENGTH * .45, HEIGHT * .3, 80, 40)
+play_rect = pygame.Rect(LENGTH * .45, HEIGHT * .2, 80, 40)
 # #SysFont(name, size, bold=False, italic=False) -> Font
 # exit_font = pygame.font.SysFont(None, 15, bold=True, italic=False)
 #
 # #rect(Surface, color, Rect, width=0) -> Rect
 # # color = (255,255,255)
-exit = pygame.draw.rect(surface, lime_green, exit_rect, 0)
-play = pygame.draw.rect(surface, red, play_rect, 0)
+exit = pygame.draw.rect(intro_screen_background, white, exit_rect, 2)
+play = pygame.draw.rect(intro_screen_background, white, play_rect, 2)
 
 # # #render(text, antialias, color, background=None)
 exit_font = pygame.font.Font(None, 15, bold=True, italic=False)
@@ -89,8 +90,10 @@ play_labelpos.centery = play.centery
 
 
 
+
+
 def menu_screen_refresh():
-    screen.blit(surface, (0, 0))
+    screen.blit(intro_screen_background, (0, 0))
     screen.blit(exit_label, (exit_labelpos.centerx - 30, exit_labelpos.centery))
     screen.blit(play_label, (play_labelpos.centerx - 30, play_labelpos.centery))
     pygame.display.flip()
