@@ -102,12 +102,28 @@ def menu_screen_refresh():
 
 
 def board_game(event):
-    for i in range(0, 20):
+    for i in range(0, 10):
+        for j in range(0, 10):
+            is_row_even = i % 2 == 0
+            x = j * 60
+            if not is_row_even:
+                x += 30
+            y = i * 20
+            if not is_row_even:
+                y += 40
+            pygame.draw.polygon(board_surface, red, ((x + 30, y + 3), (x + 10, y + 3), (x + 0, y + 20), (x + 10, y + 37), (x + 30, y + 37), (x + 40, y + 20)))
+
+
+
+    #pygame.draw.polygon(board_surface, red, ((30, 3), (10, 3), (0, 20), (10, 37), (30, 37), (40, 20)))
+
+
+    """for i in range(0, 20):
         for j in range(0, 20):
             new_rect = pygame.Rect(i * 20, j * 20, 20, 20)
-            draw_new_rect = pygame.draw.rect(board_surface, red, new_rect, 1)
+            draw_new_rect = pygame.draw.rect(board_surface, red, new_rect, 1)"""
     screen.blit(surface, (0, 0))
-    screen.blit(board_surface, (30, 30))
+    screen.blit(board_surface, (0, 0))
     pygame.display.flip()
 
 
