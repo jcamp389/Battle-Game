@@ -1,13 +1,16 @@
 import pygame
+from pygame.locals import *
 
 pygame.init()
 pygame.font.init()
+pygame.mixer.init()
 
 LENGTH = 600
 HEIGHT = 600
 size = [LENGTH, HEIGHT]
 
 intro_screen_background = pygame.image.load('Intro_Screen_Background.jpg')
+intro_screen_music = pygame.mixer.music.load('Pippin.mp3')
 
 black = (0, 0, 0)
 lime_green = (22, 246, 74)
@@ -20,7 +23,6 @@ running = 1
 
 surface = pygame.Surface(screen.get_size())
 board_surface = pygame.Surface((LENGTH * .80, HEIGHT * .80))
-
 
 
 # Rect(left, top, width, height) -> Rect
@@ -126,7 +128,7 @@ def start_button_clicked(x, y):
         return True
     return False
 
-
+pygame.mixer.music.play(-1)
 # 0 = menu
 # 1 = quit
 # 2 = leaderboard
@@ -134,6 +136,8 @@ def start_button_clicked(x, y):
 state = 0
 while (state != 1):
     for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            state = 1
         if state == 0:
             if pygame.mouse.get_pressed()[0] == 1:
                 my_mouse_pos = pygame.mouse.get_pos()
