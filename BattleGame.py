@@ -87,7 +87,7 @@ def menu_screen_refresh():
     screen.blit(play_label, (play_labelpos.centerx - 30, play_labelpos.centery))
     display_xy()
 
-class Hexagon(object):
+class BoardTile(object):
     def __init__(self, top_left, top_right, right, bot_right, bot_left, left, tile_color):
         self.top_left = top_left
         self.top_right = top_right
@@ -97,8 +97,16 @@ class Hexagon(object):
         self.left = left
         self.tile_color = tile_color
 
+    def get_tile_coordinates(self):
+        return self.top_left, self.top_right, self.right, self.bot_right, self.bot_left, self.left
+
     def __repr__(self):
         return "{} {} {} {} {} {}".format(self.top_left, self.top_right, self.right, self.bot_right, self.bot_left, self.left)
+
+def random_tile():
+    possible_tiles = [red, white, green, brown, yellow]
+    index = random.randint(0, len(possible_tiles) - 1)
+    return possible_tiles[index]
 
 def board_initializer():
     count_per_column = 10
@@ -113,8 +121,7 @@ def board_initializer():
             if not is_row_even:
                 x += (dimensions * .75)
             y = i * (dimensions * .425)
-
-            h = Hexagon((x + (dimensions * .75), y + (dimensions * .075)),
+            h = BoardTile((x + (dimensions * .75), y + (dimensions * .075)),
                 (x + (dimensions * .25), y + (dimensions * .075)),
                 (x, y + (dimensions * .5)),
                 (x + (dimensions * .25), y + (dimensions * .925)),
@@ -125,47 +132,34 @@ def board_initializer():
     return board_matrix
 
 def is_mouse_in_coordinates(tile, mouse_x, mouse_y):
-    # returns True if mouse x and mosue y inside this hexagon, else False
+    # returns True if mouse x and mosue y inside this BoardTile, else False
     tl = tile.top_left
     return False
 
 def board_game():
     global board
+    if board is None:
+        board = board_initializer()
     for i in range(0, len(board)):
         for j in range(0, len(board[0])):
             current_tile = board[i][j]
             if is_mouse_in_coordinates(current_tile, pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]):
                 current_tile.tile_color = grey
-            pygame.draw.polygon(board_surface, current_tile.tile_color,
-                                (current_tile.top_left, current_tile.top_right, current_tile.right, current_tile.bot_right, current_tile.bot_left, current_tile.left), 0)
+            pygame.draw.polygon(board_surface, current_tile.tile_color, current_tile.get_tile_coordinates(), 0)
             # border pass
-            pygame.draw.polygon(board_surface, grey,
-                                (current_tile.top_left, current_tile.top_right, current_tile.right, current_tile.bot_right, current_tile.bot_left, current_tile.left), 2)
+            pygame.draw.polygon(board_surface, grey, current_tile.get_tile_coordinates(), 2)
 
     screen.blit(surface, (0, 0))
     screen.blit(board_surface, (25, 25))
     display_xy()
 
-
-def random_tile():
-    possible_tiles = [red, white, green, brown, yellow]
-    index = random.randint(0, len(possible_tiles) - 1)
-    return possible_tiles[index]
-
-
 def quit_button_clicked(x, y):
-    if x > exit_rect.left and \
-                    x < exit_rect.right and \
-                    y > exit_rect.top and \
-                    y < exit_rect.bottom:
+    if exit_rect.left < x < exit_rect.right and exit_rect.top < y < exit_rect.bottom:
         return True
     return False
 
 def start_button_clicked(x, y):
-    if x > play_rect.left and \
-                    x < play_rect.right and \
-                    y > play_rect.top and \
-                    y < play_rect.bottom:
+    if play_rect.left < x < play_rect.right and play_rect.top < y < play_rect.bottom:
         return True
     return False
 
@@ -180,27 +174,8 @@ def process_user_input(state):
                     state = 1
                 elif start_button_clicked(my_mouse_pos[0], my_mouse_pos[1]):
                     state = 3
-
             menu_screen_refresh()
-
-
     return state
-
-
-def draw_current_state_of_board(state, has_drawn_board):
-    if state != 3:
-        # we're in the wrong state. return early, and say we didn't draw the board.
-        return False
-    
-    global board
-    if board is not None:
-        # we've already drawn the board. return early, and report that we have drawn the board.
-        return True
-
-    # everything is chill. let's draw the board and then report that we drew it.
-    board = board_initializer()
-    return True
-
 
 load_music()
 
@@ -211,8 +186,8 @@ load_music()
 state = 0
 has_drawn_board = False
 while state != 1:
-    if has_drawn_board: board_game()
+    if state == 3: board_game()
     state = process_user_input(state)
-    has_drawn_board = draw_current_state_of_board(state, has_drawn_board)
     pygame.display.flip()
+
 
