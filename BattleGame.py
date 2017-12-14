@@ -38,7 +38,7 @@ brown = (165, 42, 42)
 red = (255, 0, 0)
 green = (0, 255, 0)
 white = (255, 255, 255)
-grey = (244, 246, 249)
+grey = (64, 64, 64)
 
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("HEXCELSIOR")
