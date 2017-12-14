@@ -1,7 +1,6 @@
 """
 TODO-LIST:
     - replace the `state` ints with a set of constants (like an enum).
-    - have the tiles highlight when you hover.
     - set up players (gets us into python classes).
     - animate a cloud across the menu screen.
     - set up home bases.
