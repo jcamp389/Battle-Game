@@ -188,7 +188,7 @@ def process_user_input(state):
             menu_screen_refresh()
     return state
 
-# load_music()
+load_music()
 
 # 0 = menu
 # 1 = quit
