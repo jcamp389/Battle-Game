@@ -1,12 +1,10 @@
 """
-
 TODO-LIST:
     - replace the `state` ints with a set of constants (like an enum).
     - have the tiles highlight when you hover.
     - set up players (gets us into python classes).
     - animate a cloud across the menu screen.
     - set up home bases.
-
 """
 
 
@@ -47,7 +45,8 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption("HEXCELSIOR")
 
 surface = pygame.Surface(screen.get_size())
-board_surface = pygame.Surface(screen.get_size())
+
+board_offset = (25, 25)
 
 exit_rect = pygame.Rect(LENGTH * .45, HEIGHT * .3, 80, 40)
 play_rect = pygame.Rect(LENGTH * .45, HEIGHT * .2, 80, 40)
@@ -87,8 +86,10 @@ def menu_screen_refresh():
     screen.blit(play_label, (play_labelpos.centerx - 30, play_labelpos.centery))
     display_xy()
 
-class BoardTile(object):
-    def __init__(self, top_left, top_right, right, bot_right, bot_left, left, tile_color):
+class BoardTile(pygame.sprite.Sprite):
+    def __init__(self, top_right, top_left, left, bot_left, bot_right, right, tile_color):
+        pygame.sprite.Sprite.__init__(self)
+
         self.top_left = top_left
         self.top_right = top_right
         self.right = right
@@ -96,6 +97,7 @@ class BoardTile(object):
         self.bot_left = bot_left
         self.left = left
         self.tile_color = tile_color
+        self.rect = pygame.Rect(top_left[0], top_left[1], top_right[0] - top_left[0], bot_left[1] - top_left[1])
 
     def get_tile_coordinates(self):
         return self.top_left, self.top_right, self.right, self.bot_right, self.bot_left, self.left
@@ -121,6 +123,11 @@ def board_initializer():
             if not is_row_even:
                 x += (dimensions * .75)
             y = i * (dimensions * .425)
+
+            # Account for the board not starting in the exact top-left corner of the screen.
+            x += board_offset[0]
+            y += board_offset[1]
+
             h = BoardTile((x + (dimensions * .75), y + (dimensions * .075)),
                 (x + (dimensions * .25), y + (dimensions * .075)),
                 (x, y + (dimensions * .5)),
@@ -131,26 +138,31 @@ def board_initializer():
 
     return board_matrix
 
+
 def is_mouse_in_coordinates(tile, mouse_x, mouse_y):
     # returns True if mouse x and mosue y inside this BoardTile, else False
-    tl = tile.top_left
-    return False
+    rect = tile.rect
+    if rect.collidepoint(mouse_x, mouse_y):
+        return True
+    else:
+        return False
 
 def board_game():
     global board
+    currently_highlighted_tile = None
     if board is None:
         board = board_initializer()
     for i in range(0, len(board)):
         for j in range(0, len(board[0])):
             current_tile = board[i][j]
             if is_mouse_in_coordinates(current_tile, pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]):
-                current_tile.tile_color = grey
-            pygame.draw.polygon(board_surface, current_tile.tile_color, current_tile.get_tile_coordinates(), 0)
+                currently_highlighted_tile = current_tile
+            draw_color = grey if current_tile == currently_highlighted_tile else current_tile.tile_color
+            pygame.draw.polygon(surface, draw_color, current_tile.get_tile_coordinates(), 0)
             # border pass
-            pygame.draw.polygon(board_surface, grey, current_tile.get_tile_coordinates(), 2)
+            pygame.draw.polygon(surface, grey, current_tile.get_tile_coordinates(), 2)
 
     screen.blit(surface, (0, 0))
-    screen.blit(board_surface, (25, 25))
     display_xy()
 
 def quit_button_clicked(x, y):
@@ -177,7 +189,7 @@ def process_user_input(state):
             menu_screen_refresh()
     return state
 
-load_music()
+# load_music()
 
 # 0 = menu
 # 1 = quit
@@ -186,8 +198,7 @@ load_music()
 state = 0
 has_drawn_board = False
 while state != 1:
-    if state == 3: board_game()
+    if state == 3:
+        board_game()
     state = process_user_input(state)
     pygame.display.flip()
-
-
