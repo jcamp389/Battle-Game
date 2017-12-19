@@ -1,6 +1,6 @@
 """
 TODO-LIST:
-    - give the button class a button handler property (are closures a thing in python?).
+    - move the button click detection method into the button class.
     - animate a cloud across the menu screen.
     - set up players (gets us into python classes).
     - set up home bases.
