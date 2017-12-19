@@ -1,6 +1,5 @@
 """
 TODO-LIST:
-    - replace the `state` ints with a set of constants (like an enum).
     - mute button.
     - animate a cloud across the menu screen.
     - set up players (gets us into python classes).
@@ -14,6 +13,12 @@ import random
 pygame.init()
 pygame.font.init()
 pygame.mixer.init()
+
+
+STATE_MENU = 0
+STATE_QUIT = 1
+STATE_BOARD_GAME = 2
+
 
 LENGTH = 1000
 HEIGHT = 600
@@ -204,14 +209,14 @@ def start_button_clicked(x, y):
 def process_user_input(state):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            state = 1
-        if state == 0:
+            state = STATE_QUIT
+        if state == STATE_MENU:
             if pygame.mouse.get_pressed()[0] == 1:
                 my_mouse_pos = pygame.mouse.get_pos()
                 if quit_button_clicked(my_mouse_pos[0], my_mouse_pos[1]):
-                    state = 1
+                    state = STATE_QUIT
                 elif start_button_clicked(my_mouse_pos[0], my_mouse_pos[1]):
-                    state = 3
+                    state = STATE_BOARD_GAME
             menu_screen_refresh()
     return state
 
@@ -219,14 +224,10 @@ def process_user_input(state):
 # load_music()
 
 
-# 0 = menu
-# 1 = quit
-# 2 = leaderboard
-# 3 = board game
-state = 0
+state = STATE_MENU
 has_drawn_board = False
-while state != 1:
-    if state == 3:
+while state != STATE_QUIT:
+    if state == STATE_BOARD_GAME:
         board_game()
     state = process_user_input(state)
     pygame.display.flip()
