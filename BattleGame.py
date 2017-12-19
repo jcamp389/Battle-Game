@@ -1,9 +1,9 @@
 """
 TODO-LIST:
-    - mute button.
     - replace the `state` ints with a set of constants (like an enum).
-    - set up players (gets us into python classes).
+    - mute button.
     - animate a cloud across the menu screen.
+    - set up players (gets us into python classes).
     - set up home bases.
 """
 
