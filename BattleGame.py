@@ -1,5 +1,6 @@
 """
 TODO-LIST:
+    - mute button.
     - replace the `state` ints with a set of constants (like an enum).
     - set up players (gets us into python classes).
     - animate a cloud across the menu screen.
@@ -215,7 +216,7 @@ def process_user_input(state):
     return state
 
 
-load_music()
+# load_music()
 
 
 # 0 = menu
