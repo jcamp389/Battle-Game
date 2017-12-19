@@ -1,6 +1,7 @@
 """
 TODO-LIST:
     - move the button click detection method into the button class.
+    - add a turn timer (alternate between "plan" phase and "action" phase).
     - animate a cloud across the menu screen.
     - set up players (gets us into python classes).
     - set up home bases.
