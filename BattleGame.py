@@ -1,6 +1,5 @@
 """
 TODO-LIST:
-    - mute button.
     - animate a cloud across the menu screen.
     - set up players (gets us into python classes).
     - set up home bases.
@@ -23,6 +22,9 @@ STATE_BOARD_GAME = 2
 LENGTH = 1000
 HEIGHT = 600
 size = [LENGTH, HEIGHT]
+
+
+music_is_playing = True
 
 
 def load_music():
@@ -53,23 +55,27 @@ surface = pygame.Surface(screen.get_size())
 
 board_offset = (25, 25)
 
-exit_rect = pygame.Rect(LENGTH * .45, HEIGHT * .3, 80, 40)
-play_rect = pygame.Rect(LENGTH * .45, HEIGHT * .2, 80, 40)
-
-exit = pygame.draw.rect(intro_screen_background, white, exit_rect, 2)
-play = pygame.draw.rect(intro_screen_background, white, play_rect, 2)
+exit_rect = pygame.draw.rect(intro_screen_background, white, pygame.Rect(LENGTH * .45, HEIGHT * .3, 80, 40), 2)
+play_rect = pygame.draw.rect(intro_screen_background, white, pygame.Rect(LENGTH * .45, HEIGHT * .2, 80, 40), 2)
+toggle_music_rect = pygame.draw.rect(intro_screen_background, white, pygame.Rect(LENGTH * .9, 0, 100, 40), 2)
 
 exit_font = pygame.font.Font(None, 15, bold=True, italic=False)
 exit_label = exit_font.render("EXIT GAME", True, white)
 exit_labelpos = exit_label.get_rect()
-exit_labelpos.centerx = exit.centerx
-exit_labelpos.centery = exit.centery
+exit_labelpos.centerx = exit_rect.centerx
+exit_labelpos.centery = exit_rect.centery
 
 play_font = pygame.font.Font(None, 15, bold=True, italic=False)
 play_label = play_font.render("PLAY GAME", True, white)
 play_labelpos = play_label.get_rect()
-play_labelpos.centerx = play.centerx
-play_labelpos.centery = play.centery
+play_labelpos.centerx = play_rect.centerx
+play_labelpos.centery = play_rect.centery
+
+toggle_music_font = pygame.font.Font(None, 15, bold=True, italic=False)
+toggle_music_label = toggle_music_font.render("TOGGLE MUSIC", True, white)
+toggle_music_labelpos = toggle_music_label.get_rect()
+toggle_music_labelpos.centerx = toggle_music_rect.centerx
+toggle_music_labelpos.centery = toggle_music_rect.centery
 
 board = None
 
@@ -87,11 +93,18 @@ def display_xy():
     screen.blit(currentxy_label, (currentxy_labelpos.centerx - 35, currentxy_labelpos.centery - 5))
 
 
+def display_toggle_music():
+    toggle_music_rect = pygame.Rect(LENGTH * .9, 0, 100, 40)
+    toggle_music = pygame.draw.rect(surface, white, toggle_music_rect, 2)
+    screen.blit(toggle_music_label, (toggle_music_labelpos.centerx - 40, toggle_music_labelpos.centery - 5))
+
+
 def menu_screen_refresh():
     screen.blit(intro_screen_background, (0, 0))
     screen.blit(exit_label, (exit_labelpos.centerx - 30, exit_labelpos.centery))
     screen.blit(play_label, (play_labelpos.centerx - 30, play_labelpos.centery))
     display_xy()
+    display_toggle_music()
 
 
 class BoardTile(pygame.sprite.Sprite):
@@ -192,36 +205,52 @@ def board_game():
 
     screen.blit(surface, (0, 0))
     display_xy()
+    display_toggle_music()
 
 
-def quit_button_clicked(x, y):
-    if exit_rect.left < x < exit_rect.right and exit_rect.top < y < exit_rect.bottom:
+def button_clicked(button, x, y):
+    if button.left < x < button.right and button.top < y < button.bottom:
         return True
     return False
 
 
-def start_button_clicked(x, y):
-    if play_rect.left < x < play_rect.right and play_rect.top < y < play_rect.bottom:
-        return True
-    return False
+def toggle_music():
+    global music_is_playing
+    music = pygame.mixer.music
+    if music_is_playing:
+        music.pause()
+        music_is_playing = False
+    else:
+        music.unpause()
+        music_is_playing = True
 
 
 def process_user_input(state):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             state = STATE_QUIT
-        if state == STATE_MENU:
+
+        elif state == STATE_MENU:
             if pygame.mouse.get_pressed()[0] == 1:
                 my_mouse_pos = pygame.mouse.get_pos()
-                if quit_button_clicked(my_mouse_pos[0], my_mouse_pos[1]):
+                if button_clicked(exit_rect, my_mouse_pos[0], my_mouse_pos[1]):
                     state = STATE_QUIT
-                elif start_button_clicked(my_mouse_pos[0], my_mouse_pos[1]):
+                elif button_clicked(play_rect, my_mouse_pos[0], my_mouse_pos[1]):
                     state = STATE_BOARD_GAME
+                elif button_clicked(toggle_music_rect, my_mouse_pos[0], my_mouse_pos[1]):
+                    toggle_music()
             menu_screen_refresh()
+
+        elif state == STATE_BOARD_GAME:
+            if pygame.mouse.get_pressed()[0] == 1:
+                my_mouse_pos = pygame.mouse.get_pos()
+                if button_clicked(toggle_music_rect, my_mouse_pos[0], my_mouse_pos[1]):
+                    toggle_music()
+
     return state
 
 
-# load_music()
+load_music()
 
 
 state = STATE_MENU
