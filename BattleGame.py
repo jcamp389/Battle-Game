@@ -1,5 +1,10 @@
 """
 TODO-LIST:
+    - create background
+    - connect ready button with phase text
+    - highlighting for buttons
+    - button enabled property
+    - create label class
     - move the button click detection method into the button class.
     - add a turn timer (alternate between "plan" phase and "action" phase).
     - animate a cloud across the menu screen.
@@ -10,6 +15,7 @@ TODO-LIST:
 
 import pygame
 import random
+import threading
 
 pygame.init()
 pygame.font.init()
@@ -21,12 +27,16 @@ STATE_QUIT = 1
 STATE_BOARD_GAME = 2
 
 
-LENGTH = 1000
-HEIGHT = 600
-size = [LENGTH, HEIGHT]
+SCREENLENGTH = 1000
+SCREENHEIGHT = 600
+BOARDHEIGHT = SCREENHEIGHT * .8
+BOARDLENGTH = SCREENLENGTH * .8
+size = [SCREENLENGTH, SCREENHEIGHT]
 
 
 music_is_playing = True
+
+current_phase = "PLANNING PHASE"
 
 
 def load_music():
@@ -38,7 +48,7 @@ def load_music():
 
 
 intro_screen_background = pygame.image.load('Intro_Screen_Background.jpg')
-intro_screen_background = pygame.transform.scale(intro_screen_background, (LENGTH, HEIGHT))
+intro_screen_background = pygame.transform.scale(intro_screen_background, (SCREENLENGTH, SCREENHEIGHT))
 
 # colors
 black = (0, 0, 0)
@@ -83,9 +93,10 @@ class Button(pygame.sprite.Sprite):
         screen.blit(label, label_pos)
 
 
-exit_button = Button("EXIT GAME", LENGTH * .45, HEIGHT * .3, 80, 40, white)
-play_button = Button("PLAY GAME", LENGTH * .45, HEIGHT * .2, 80, 40, white)
-toggle_music_button = Button("TOGGLE MUSIC", LENGTH * .9, 0, 100, 40, white)
+exit_button = Button("EXIT GAME", SCREENLENGTH * .45, SCREENHEIGHT * .3, 80, 40, white)
+play_button = Button("PLAY GAME", SCREENLENGTH * .45, SCREENHEIGHT * .2, 80, 40, white)
+toggle_music_button = Button("TOGGLE MUSIC", SCREENLENGTH * .9, 0, 100, 40, white)
+ready_button = Button("READY", SCREENLENGTH * .6, SCREENHEIGHT * .01, 100, 40, white)
 
 
 board = None
@@ -99,10 +110,34 @@ def display_xy():
     final_xy_list = " ".join(current_xy_text_list)
     currentxy_label = font.render(str(final_xy_list), True, red)
     currentxy_labelpos = currentxy_label.get_rect()
-    currentxyrect = pygame.Rect(LENGTH * .8, HEIGHT * .01, 80, 15)
+    currentxyrect = pygame.Rect(SCREENLENGTH * .8, SCREENHEIGHT * .01, 80, 15)
     currentxy_labelpos.centerx = currentxyrect.centerx
     currentxy_labelpos.centery = currentxyrect.centery
     screen.blit(currentxy_label, (currentxy_labelpos.centerx - 35, currentxy_labelpos.centery - 5))
+
+def display_phase():
+    global current_phase
+    font = pygame.font.Font(None, 15, bold=True, italic=False)
+    phase_label = font.render(current_phase, True, red)
+    phase_labelpos = phase_label.get_rect()
+    phase_rect = pygame.Rect(SCREENLENGTH * .35, SCREENHEIGHT * .01, 80, 15)
+    phase_labelpos.centerx = phase_rect.centerx
+    phase_labelpos.centery = phase_rect.centery
+    screen.blit(phase_label, (phase_labelpos.centerx - 35, phase_labelpos.centery - 5))
+
+def changephase():
+    global current_phase
+    timer = threading.Timer(30.0, changephase)
+    timer.daemon = True
+    timer.start()
+    if current_phase == "PLANNING PHASE":
+        current_phase = "ACTION PHASE"
+    else:
+        current_phase = "PLANNING PHASE"
+
+
+
+
 
 
 def display_toggle_music(surface):
@@ -115,6 +150,11 @@ def menu_screen_refresh():
     play_button.draw(intro_screen_background)
     display_xy()
     display_toggle_music(intro_screen_background)
+
+def game_screen_refresh():
+    screen.blit(surface, (0, 0))
+    ready_button.draw(surface)
+    board_game()
 
 
 class BoardTile(pygame.sprite.Sprite):
@@ -164,7 +204,7 @@ def random_tile():
 def board_initializer():
     count_per_column = 10
     count_per_row = count_per_column * 2
-    dimensions = HEIGHT / count_per_column
+    dimensions = BOARDHEIGHT / count_per_column
     board_matrix = []
     for i in range(0, count_per_row):
         board_matrix.append([])
@@ -174,6 +214,7 @@ def board_initializer():
             if not is_row_even:
                 x += (dimensions * .75)
             y = i * (dimensions * .425)
+            y += dimensions/2
 
             # Account for the board not starting in the exact top-left corner of the screen.
             x += board_offset[0]
@@ -202,6 +243,7 @@ def board_game():
     global board
     currently_highlighted_tile = None
     if board is None:
+        changephase()
         board = board_initializer()
     for i in range(0, len(board)):
         for j in range(0, len(board[0])):
@@ -213,8 +255,9 @@ def board_game():
             # border pass
             pygame.draw.polygon(surface, grey, current_tile.get_tile_coordinates(), 2)
 
-    screen.blit(surface, (0, 0))
+
     display_xy()
+    display_phase()
     display_toggle_music(surface)
 
 
@@ -267,6 +310,6 @@ state = STATE_MENU
 has_drawn_board = False
 while state != STATE_QUIT:
     if state == STATE_BOARD_GAME:
-        board_game()
+        game_screen_refresh()
     state = process_user_input(state)
     pygame.display.flip()
