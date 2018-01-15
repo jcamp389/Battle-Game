@@ -50,6 +50,16 @@ def load_music():
 intro_screen_background = pygame.image.load('Intro_Screen_Background.jpg')
 intro_screen_background = pygame.transform.scale(intro_screen_background, (SCREENLENGTH, SCREENHEIGHT))
 
+unit_scale_factor = int((BOARDHEIGHT/10) * .8)
+bow = pygame.image.load('bow.png')
+bow = pygame.transform.scale(bow, (unit_scale_factor, unit_scale_factor))
+sword = pygame.image.load('sword.png')
+sword = pygame.transform.scale(sword, (unit_scale_factor, unit_scale_factor))
+spear = pygame.image.load('spear.png')
+spear = pygame.transform.scale(spear, (unit_scale_factor, unit_scale_factor))
+horseman = pygame.image.load('horseman1.png')
+horseman = pygame.transform.scale(horseman, (unit_scale_factor, unit_scale_factor))
+
 # colors
 black = (0, 0, 0)
 lime_green = (22, 246, 74)
@@ -79,11 +89,15 @@ class Button(pygame.sprite.Sprite):
         self.height = height
         self.color = color
         self.rect = pygame.Rect(x, y, width, height)
+        self.visible = True
 
     def __repr__(self):
         return "{} ({}, {})".format(self.title, self.x, self.y)
 
     def draw(self, surface):
+        if self.visible is False:
+            return
+        print(self.visible)
         rect = pygame.draw.rect(surface, self.color, pygame.Rect(self.x, self.y, self.width, self.height), 2)
         font = pygame.font.Font(None, 15, bold=True, italic=False)
         label = font.render(self.title, True, self.color)
@@ -92,6 +106,56 @@ class Button(pygame.sprite.Sprite):
         label_pos.centery = rect.centery
         screen.blit(label, label_pos)
 
+
+    def is_clicked(self, x=None, y=None):
+        if x is None or y is None:
+            my_mouse_pos = pygame.mouse.get_pos()
+            x = my_mouse_pos[0]
+            y = my_mouse_pos[1]
+
+        if self.rect.left < x < self.rect.right and self.rect.top < y < self.rect.bottom:
+            return True
+        return False
+
+    def set_visibility(self, visible=True):
+        self.visible = visible
+
+class BoardTile(pygame.sprite.Sprite):
+    def __init__(self, top_right, top_left, left, bot_left, bot_right, right, tile_color):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.top_left = top_left
+        self.top_right = top_right
+        self.right = right
+        self.bot_right = bot_right
+        self.bot_left = bot_left
+        self.left = left
+        self.tile_color = tile_color
+        self.rect = pygame.Rect(top_left[0], top_left[1], top_right[0] - top_left[0], bot_left[1] - top_left[1])
+
+    def get_tile_coordinates(self):
+        return self.top_left, self.top_right, self.right, self.bot_right, self.bot_left, self.left
+
+    def contains(self, x, y):
+        # adapted from http://www.ariel.com.au/a/python-point-int-poly.html
+        coordinates = self.get_tile_coordinates()
+        n = len(coordinates)
+        contains_point = False
+
+        p1x, p1y = coordinates[0]
+        for i in range(n + 1):
+            p2x, p2y = coordinates[i % n]
+            if y > min(p1y, p2y) and y <= max(p1y, p2y) and x <= max(p1x, p2x):
+                if p1y != p2y:
+                    xinters = (y-p1y) * (p2x-p1x) / (p2y-p1y) + p1x
+                if p1x == p2x or x <= xinters:
+                    contains_point = not contains_point
+            p1x, p1y = p2x, p2y
+
+        return contains_point
+
+    def __repr__(self):
+        return "{} {} {} {} {} {}".format(self.top_left, self.top_right, self.right, self.bot_right, self.bot_left, self.left)
 
 exit_button = Button("EXIT GAME", SCREENLENGTH * .45, SCREENHEIGHT * .3, 80, 40, white)
 play_button = Button("PLAY GAME", SCREENLENGTH * .45, SCREENHEIGHT * .2, 80, 40, white)
@@ -135,7 +199,9 @@ def changephase():
     else:
         current_phase = "PLANNING PHASE"
 
-
+def action_sequence():
+    global ready_button
+    ready_button.set_visibility(visible=False)
 
 
 
@@ -153,46 +219,13 @@ def menu_screen_refresh():
 
 def game_screen_refresh():
     screen.blit(surface, (0, 0))
+    screen.blit(bow, (830,115))
+    screen.blit(sword, (870, 115))
+    screen.blit(spear, (910,115))
+    screen.blit(horseman, (950, 115))
     ready_button.draw(surface)
     board_game()
 
-
-class BoardTile(pygame.sprite.Sprite):
-    def __init__(self, top_right, top_left, left, bot_left, bot_right, right, tile_color):
-        pygame.sprite.Sprite.__init__(self)
-
-        self.top_left = top_left
-        self.top_right = top_right
-        self.right = right
-        self.bot_right = bot_right
-        self.bot_left = bot_left
-        self.left = left
-        self.tile_color = tile_color
-        self.rect = pygame.Rect(top_left[0], top_left[1], top_right[0] - top_left[0], bot_left[1] - top_left[1])
-
-    def get_tile_coordinates(self):
-        return self.top_left, self.top_right, self.right, self.bot_right, self.bot_left, self.left
-
-    def contains(self, x, y):
-        # adapted from http://www.ariel.com.au/a/python-point-int-poly.html
-        coordinates = self.get_tile_coordinates()
-        n = len(coordinates)
-        contains_point = False
-
-        p1x, p1y = coordinates[0]
-        for i in range(n + 1):
-            p2x, p2y = coordinates[i % n]
-            if y > min(p1y, p2y) and y <= max(p1y, p2y) and x <= max(p1x, p2x):
-                if p1y != p2y:
-                    xinters = (y-p1y) * (p2x-p1x) / (p2y-p1y) + p1x
-                if p1x == p2x or x <= xinters:
-                    contains_point = not contains_point
-            p1x, p1y = p2x, p2y
-
-        return contains_point
-
-    def __repr__(self):
-        return "{} {} {} {} {} {}".format(self.top_left, self.top_right, self.right, self.bot_right, self.bot_left, self.left)
 
 
 def random_tile():
@@ -261,10 +294,7 @@ def board_game():
     display_toggle_music(surface)
 
 
-def button_clicked(button, x, y):
-    if button.left < x < button.right and button.top < y < button.bottom:
-        return True
-    return False
+
 
 
 def toggle_music():
@@ -286,19 +316,22 @@ def process_user_input(state):
         elif state == STATE_MENU:
             if pygame.mouse.get_pressed()[0] == 1:
                 my_mouse_pos = pygame.mouse.get_pos()
-                if button_clicked(exit_button.rect, my_mouse_pos[0], my_mouse_pos[1]):
+                if exit_button.is_clicked(my_mouse_pos[0], my_mouse_pos[1]):
                     state = STATE_QUIT
-                elif button_clicked(play_button.rect, my_mouse_pos[0], my_mouse_pos[1]):
+                elif play_button.is_clicked(my_mouse_pos[0], my_mouse_pos[1]):
                     state = STATE_BOARD_GAME
-                elif button_clicked(toggle_music_button.rect, my_mouse_pos[0], my_mouse_pos[1]):
+                elif toggle_music_button.is_clicked(my_mouse_pos[0], my_mouse_pos[1]):
                     toggle_music()
             menu_screen_refresh()
 
         elif state == STATE_BOARD_GAME:
             if pygame.mouse.get_pressed()[0] == 1:
                 my_mouse_pos = pygame.mouse.get_pos()
-                if button_clicked(toggle_music_button.rect, my_mouse_pos[0], my_mouse_pos[1]):
+                if toggle_music_button.is_clicked(my_mouse_pos[0], my_mouse_pos[1]):
                     toggle_music()
+                elif ready_button.is_clicked():
+                    action_sequence()
+
 
     return state
 
