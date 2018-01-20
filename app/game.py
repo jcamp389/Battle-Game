@@ -15,6 +15,9 @@ class Game(object):
         self.board = None
         self.board_offset = (25, 25)
         self.current_phase = 'PLANNING PHASE'
+        self.background = pygame.image.load('images/old_paper.png')
+        self.background = pygame.transform.scale(self.background, (Props.SCREENLENGTH, Props.SCREENHEIGHT))
+
 
         self.BOARDHEIGHT = Props.SCREENHEIGHT * .8
         self.BOARDLENGTH = Props.SCREENLENGTH * .8
@@ -63,7 +66,7 @@ class Game(object):
         return possible_tiles[index]
 
     def refresh(self):
-        self.screen.blit(self.surface, (0, 0))
+        self.screen.blit(self.background, (0, 0))
         self.screen.blit(self.bow, (830,115))
         self.screen.blit(self.sword, (870, 115))
         self.screen.blit(self.spear, (910,115))
@@ -106,9 +109,9 @@ class Game(object):
                 if current_tile.contains(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]):
                     currently_highlighted_tile = current_tile
                 draw_color = Props.grey if current_tile == currently_highlighted_tile else current_tile.tile_color
-                pygame.draw.polygon(self.surface, draw_color, current_tile.get_tile_coordinates(), 0)
+                pygame.draw.polygon(self.background, draw_color, current_tile.get_tile_coordinates(), 0)
                 # border pass
-                pygame.draw.polygon(self.surface, Props.grey, current_tile.get_tile_coordinates(), 2)
+                pygame.draw.polygon(self.background, Props.grey, current_tile.get_tile_coordinates(), 2)
 
     def process_user_input(self):
         state = self.STATE_BOARD_GAME
