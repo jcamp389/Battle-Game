@@ -14,10 +14,12 @@ class Game(object):
         self.surface = surface
         self.board = None
         self.board_offset = (25, 25)
-        self.current_phase = 'PLANNING PHASE'
+
         self.background = pygame.image.load('images/old_paper.png')
         self.background = pygame.transform.scale(self.background, (Props.SCREENLENGTH, Props.SCREENHEIGHT))
-
+        self.PHASE_PLANNING = 1
+        self.PHASE_ACTION = 2
+        self.current_phase = self.PHASE_PLANNING
 
         self.BOARDHEIGHT = Props.SCREENHEIGHT * .8
         self.BOARDLENGTH = Props.SCREENLENGTH * .8
@@ -71,37 +73,45 @@ class Game(object):
         self.screen.blit(self.sword, (870, 115))
         self.screen.blit(self.spear, (910,115))
         self.screen.blit(self.horseman, (950, 115))
-        self.ready_button.draw(self.surface, self.screen)
+        self.ready_button.draw(self.screen)
         self.board_game()
         self.display_phase()
         Utils.display_xy(self.screen)
-        self.music.music_button.draw(self.surface, self.screen)
+        self.music.music_button.draw(self.screen)
+
+        if self.current_phase == self.PHASE_PLANNING:
+            self.ready_button.set_visibility(visible=True)
+            self.ready_button.set_enabled(enabled=True)
+        else:
+            self.ready_button.set_visibility(visible=False)
+            self.ready_button.set_enabled(enabled=False)
+
 
     def display_phase(self):
         font = pygame.font.Font(None, 15, bold=True, italic=False)
-        phase_label = font.render(self.current_phase, True, Props.red)
+        phase_title = "PLANNING PHASE" if self.current_phase == self.PHASE_PLANNING else "ACTION PHASE"
+        phase_label = font.render(phase_title, True, Props.red)
         phase_labelpos = phase_label.get_rect()
         phase_rect = pygame.Rect(Props.SCREENLENGTH * .35, Props.SCREENHEIGHT * .01, 80, 15)
         phase_labelpos.centerx = phase_rect.centerx
         phase_labelpos.centery = phase_rect.centery
         self.screen.blit(phase_label, (phase_labelpos.centerx - 35, phase_labelpos.centery - 5))
 
-    def changephase(self):
-        timer = threading.Timer(30.0, self.changephase)
-        timer.daemon = True
-        timer.start()
-        if self.current_phase == "PLANNING PHASE":
-            self.current_phase = "ACTION PHASE"
+    def changephase(self, should_change_phase=True):
+        self.timer = threading.Timer(5.0, self.changephase)
+        self.timer.daemon = True
+        self.timer.start()
+        if should_change_phase == False:
+            return
+        if self.current_phase == self.PHASE_PLANNING:
+            self.current_phase = self.PHASE_ACTION
         else:
-            self.current_phase = "PLANNING PHASE"
-
-    def action_sequence(self):
-        self.ready_button.set_visibility(visible=False)
+            self.current_phase = self.PHASE_PLANNING
 
     def board_game(self):
         currently_highlighted_tile = None
         if self.board is None:
-            self.changephase()
+            self.changephase(should_change_phase=False)
             self.board = self.board_initializer()
         for i in range(0, len(self.board)):
             for j in range(0, len(self.board[0])):
@@ -113,11 +123,12 @@ class Game(object):
                 # border pass
                 pygame.draw.polygon(self.background, Props.grey, current_tile.get_tile_coordinates(), 2)
 
-    def process_user_input(self):
+    def process_user_input(self, event):
         state = self.STATE_BOARD_GAME
-        if self.music.music_button.is_clicked():
+        if self.music.music_button.is_clicked(event):
             self.music.toggle_music()
-        elif self.ready_button.is_clicked():
-            self.action_sequence()
+        elif self.ready_button.is_clicked(event):
+            self.timer.cancel()
+            self.changephase()
         self.refresh()
         return state
