@@ -25,20 +25,19 @@ class Menu(object):
 
     def refresh(self):
         self.screen.blit(self.intro_screen_background, (0, 0))
-        self.exit_button.draw(self.intro_screen_background, self.screen)
-        self.play_button.draw(self.intro_screen_background, self.screen)
+        self.exit_button.draw(self.screen)
+        self.play_button.draw(self.screen)
         Utils.display_xy(self.screen)
-        self.music.music_button.draw(self.surface, self.screen)
+        self.music.music_button.draw(self.screen)
 
-    def process_user_input(self):
+    def process_user_input(self, event):
         state = self.STATE_MENU
         if pygame.mouse.get_pressed()[0] == 1:
-            my_mouse_pos = pygame.mouse.get_pos()
-            if self.exit_button.is_clicked(my_mouse_pos[0], my_mouse_pos[1]):
+            if self.exit_button.is_clicked(event):
                 state = self.STATE_QUIT
-            elif self.play_button.is_clicked(my_mouse_pos[0], my_mouse_pos[1]):
+            elif self.play_button.is_clicked(event):
                 state = self.STATE_BOARD_GAME
-            elif self.music.music_button.is_clicked(my_mouse_pos[0], my_mouse_pos[1]):
+            elif self.music.music_button.is_clicked(event):
                 self.music.toggle_music()
         self.refresh()
         return state
