@@ -1,15 +1,16 @@
 """
 TODO-LIST:
-    - create background
-    - connect ready button with phase text
     - highlighting for buttons
-    - button enabled property
     - create label class
-    - move the button click detection method into the button class.
-    - add a turn timer (alternate between "plan" phase and "action" phase).
     - animate a cloud across the menu screen.
     - set up players (gets us into python classes).
     - set up home bases.
+    - display time remaining in planning phase
+    - add more songs to the music queue and add more music functionality
+    - create buttons with images
+    - apply button properties to unit icons
+    - add button to take you back to main menu
+    - move state constants to another file
 """
 import pygame
 from app.properties import Properties as Props
@@ -28,6 +29,7 @@ class Main(object):
         pygame.font.init()
         pygame.mixer.init()
 
+
         self.screen = pygame.display.set_mode(Props.size)
         self.surface = pygame.Surface(self.screen.get_size())
         pygame.display.set_caption("HEXCELSIOR")
@@ -41,10 +43,12 @@ class Main(object):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 state = self.STATE_QUIT
-            elif state == self.STATE_MENU:
-                state = self.menu.process_user_input()
+            if state == self.STATE_MENU:
+                state = self.menu.process_user_input(event)
             elif state == self.STATE_BOARD_GAME:
-                state = self.game.process_user_input()
+                state = self.game.process_user_input(event)
+
+
         return state
 
     def run(self):
