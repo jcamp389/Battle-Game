@@ -1,5 +1,6 @@
 """
 TODO-LIST:
+    - HIGHEST PIORITY: change game loop to do all updates before drawing
     - highlighting for buttons
     - create label class
     - animate a cloud across the menu screen.
