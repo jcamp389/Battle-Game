@@ -13,14 +13,15 @@ class Button(pygame.sprite.Sprite):
         self.color = color
         self.rect = pygame.Rect(x, y, width, height)
         self.visible = True
+        self.enabled = True
 
     def __repr__(self):
         return "{} ({}, {})".format(self.title, self.x, self.y)
 
-    def draw(self, surface, screen):
+    def draw(self, screen):
         if self.visible is False:
             return
-        rect = pygame.draw.rect(surface, self.color, pygame.Rect(self.x, self.y, self.width, self.height), 2)
+        rect = pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.width, self.height), 2)
         font = pygame.font.Font(None, 15, bold=True, italic=False)
         label = font.render(self.title, True, self.color)
         label_pos = label.get_rect()
@@ -29,18 +30,22 @@ class Button(pygame.sprite.Sprite):
         screen.blit(label, label_pos)
 
 
-    def is_clicked(self, x=None, y=None):
-        if x is None or y is None:
-            my_mouse_pos = pygame.mouse.get_pos()
-            x = my_mouse_pos[0]
-            y = my_mouse_pos[1]
+    def is_clicked(self, event):
+        if self.enabled == False:
+            return False
+        if event.type != pygame.MOUSEBUTTONDOWN:
+            return False
 
-        if self.rect.left < x < self.rect.right and self.rect.top < y < self.rect.bottom:
+
+        if self.rect.left < event.pos[0] < self.rect.right and self.rect.top < event.pos[1] < self.rect.bottom:
             return True
         return False
 
     def set_visibility(self, visible=True):
         self.visible = visible
+
+    def set_enabled(self, enabled=True):
+        self.enabled = enabled
 
 
 class BoardTile(pygame.sprite.Sprite):
