@@ -1,3 +1,7 @@
+
+#songs = {'sounds/Thatched Villagers.mp3', 'sounds/Mountain Emperor.mp3', 'sounds/Moorland.mp3',
+#                    'sounds/Hidden Past.mp3', 'sounds/Galway.mp3', 'sounds/Angevin B.mp3'}
+
 from app.sprites import Button
 from app.properties import Properties as Props
 import pygame
@@ -22,3 +26,5 @@ class Music(object):
             pygame.mixer.music.play(-1)
         except Exception as exc:
             print("Exception loading music: {}".format(exc))
+
+
