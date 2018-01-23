@@ -1,11 +1,10 @@
 """
 TODO-LIST:
-    - HIGHEST PIORITY: change game loop to do all updates before drawing
     - highlighting for buttons
     - create label class
     - animate a cloud across the menu screen.
-    - set up players (gets us into python classes).
-    - set up home bases.
+    - finish setting up players
+    - fog of war
     - display time remaining in planning phase
     - add more songs to the music queue and add more music functionality
     - create buttons with images
@@ -52,11 +51,18 @@ class Main(object):
 
         return state
 
+    def refresh(self, state):
+        if state == self.STATE_MENU:
+            self.menu.refresh()
+        elif state == self.STATE_BOARD_GAME:
+            self.game.refresh()
+
     def run(self):
         self.music.load_music()
         state = self.STATE_MENU
         while state != self.STATE_QUIT:
             state = self.process_user_input(state)
+            self.refresh(state)
             pygame.display.flip()
 
 if __name__ == '__main__':
