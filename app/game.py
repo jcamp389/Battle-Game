@@ -5,6 +5,15 @@ import pygame
 import threading
 from app.utils import Utils
 
+class Player(object):
+    def __init__(self, name, number, color, base_tile):
+        self.name = name
+        self.number = number
+        self.color = color
+        self.base_tile = base_tile
+        self.cost = 4
+        self.units = []
+
 class Game(object):
     def __init__(self, screen, surface, music):
         self.STATE_QUIT = 1
@@ -34,6 +43,16 @@ class Game(object):
         self.spear = pygame.transform.scale(spear, (unit_scale_factor, unit_scale_factor))
         horseman = pygame.image.load('images/horseman1.png')
         self.horseman = pygame.transform.scale(horseman, (unit_scale_factor, unit_scale_factor))
+
+        self.changephase(should_change_phase=False)
+        self.board = self.board_initializer()
+
+        #we are manually going to create players for now
+        player_1 = Player(name="Joel", number=1, color=Props.black, base_tile=self.board[4][5])
+        player_2 = Player(name="John", number=2, color=Props.green, base_tile=self.board[15][2])
+        player_3 = Player(name="Michael", number=3, color=Props.red, base_tile=self.board[15][7])
+        self.players = [player_1, player_2, player_3]
+
 
     def board_initializer(self):
         count_per_column = 10
@@ -110,15 +129,19 @@ class Game(object):
 
     def board_game(self):
         currently_highlighted_tile = None
-        if self.board is None:
-            self.changephase(should_change_phase=False)
-            self.board = self.board_initializer()
         for i in range(0, len(self.board)):
             for j in range(0, len(self.board[0])):
                 current_tile = self.board[i][j]
                 if current_tile.contains(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]):
                     currently_highlighted_tile = current_tile
                 draw_color = Props.grey if current_tile == currently_highlighted_tile else current_tile.tile_color
+                if i == 4 and j == 5:
+                    draw_color = Props.black
+                if i == 15 and j == 2:
+                    draw_color = Props.black
+                elif i == 15 and j == 7:
+                    draw_color = Props.black
+
                 pygame.draw.polygon(self.background, draw_color, current_tile.get_tile_coordinates(), 0)
                 # border pass
                 pygame.draw.polygon(self.background, Props.grey, current_tile.get_tile_coordinates(), 2)
@@ -130,5 +153,4 @@ class Game(object):
         elif self.ready_button.is_clicked(event):
             self.timer.cancel()
             self.changephase()
-        self.refresh()
         return state
