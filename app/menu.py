@@ -39,5 +39,4 @@ class Menu(object):
                 state = self.STATE_BOARD_GAME
             elif self.music.music_button.is_clicked(event):
                 self.music.toggle_music()
-        self.refresh()
         return state
