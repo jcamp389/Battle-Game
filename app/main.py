@@ -1,5 +1,6 @@
 """
 TODO-LIST:
+    - change the play and exit menu buttons to be hexagon shaped
     - highlighting for buttons
     - create label class
     - animate a cloud across the menu screen.
@@ -41,6 +42,9 @@ class Main(object):
 
     def process_user_input(self, state):
         for event in pygame.event.get():
+            if event.type == self.music.song_end:
+                print("song has ended")
+                self.music.play_next_song()
             if event.type == pygame.QUIT:
                 state = self.STATE_QUIT
             if state == self.STATE_MENU:
@@ -58,7 +62,7 @@ class Main(object):
             self.game.refresh()
 
     def run(self):
-        self.music.load_music()
+        self.music.play_first_song()
         state = self.STATE_MENU
         while state != self.STATE_QUIT:
             state = self.process_user_input(state)
