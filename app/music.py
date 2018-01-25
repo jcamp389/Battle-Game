@@ -37,14 +37,10 @@ class Music(object):
     def play_next_song(self):
         try:
             a = self.playlist[0]
-
             pygame.mixer.music.load(a)
             pygame.mixer.music.play()
             b = self.playlist.pop(0)
             self.playlist.append(b)
-
-
-
 
         except Exception as exc:
             print("Exception loading music: {}".format(exc))
