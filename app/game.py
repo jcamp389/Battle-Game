@@ -16,6 +16,7 @@ class Player(object):
 
 class Game(object):
     def __init__(self, screen, surface, music):
+        self.STATE_MENU = 0
         self.STATE_QUIT = 1
         self.STATE_BOARD_GAME = 2
         self.music = music
@@ -23,6 +24,8 @@ class Game(object):
         self.surface = surface
         self.board = None
         self.board_offset = (25, 25)
+
+        self.back_button = Button("Home Screen", Props.SCREENLENGTH * 0, Props.SCREENHEIGHT * 0, 80, 40, Props.white)
 
         self.background = pygame.image.load('images/old_paper.png')
         self.background = pygame.transform.scale(self.background, (Props.SCREENLENGTH, Props.SCREENHEIGHT))
@@ -32,7 +35,7 @@ class Game(object):
 
         self.BOARDHEIGHT = Props.SCREENHEIGHT * .8
         self.BOARDLENGTH = Props.SCREENLENGTH * .8
-        self.ready_button = Button("READY", Props.SCREENLENGTH * .6, Props.SCREENHEIGHT * .01, 100, 40, Props.white)
+        self.ready_button = Button("READY", Props.SCREENLENGTH * .6, Props.SCREENHEIGHT * 0, 100, 40, Props.white)
 
         unit_scale_factor = int((self.BOARDHEIGHT/10) * .8)
         bow = pygame.image.load('images/bow.png')
@@ -93,6 +96,7 @@ class Game(object):
         self.screen.blit(self.spear, (910,115))
         self.screen.blit(self.horseman, (950, 115))
         self.ready_button.draw(self.screen)
+        self.back_button.draw(self.screen)
         self.board_game()
         self.display_phase()
         Utils.display_xy(self.screen)
@@ -153,4 +157,6 @@ class Game(object):
         elif self.ready_button.is_clicked(event):
             self.timer.cancel()
             self.changephase()
+        elif self.back_button.is_clicked(event):
+            state = self.STATE_MENU
         return state
